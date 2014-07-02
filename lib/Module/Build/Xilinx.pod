@@ -1,0 +1,180 @@
+=head1 NAME
+
+Module::Build::Xilinx - Perl module to generate a Tcl script to create, build
+and program a Xilinx FPGA development board using Xilinx ISE Webpack.
+
+=head1 VERSION
+
+0.01
+
+=head1 SYNOPSIS
+
+  use strict;
+  use warnings;
+  use Module::Build::Xilinx;
+
+  my $build = Module::Build::Xilinx->new(
+        dist_name => 'fpgasample',
+        dist_version => '0.01',
+        dist_author => 'Vikas N Kumar <vikas@cpan.org>',
+        dist_abstract => 'This is a test',
+        proj_params => {
+            family => 'spartan3a',
+            device => 'xc3s700a',
+            package => 'fg484',
+            speed => -4,
+            language => 'VHDL', # default
+        },
+        tcl_script => 'program.tcl',
+        #... more parameters if necessary ...
+  );
+  $build->create_build_script;
+  # this creates the file Build which when run will create program.tcl  
+
+=head1 DESCRIPTION
+
+=head2 WHAT DOES THE MODULE DO ?
+
+Xilinx ISE Webpack allows for commandline project creation, management,
+build/compile, run, simulation and programming of the device as well.
+However, Xilinx ISE Webpack only supports Tcl scripts using their custom
+C<xtclsh> program.
+
+To ease writing of this Tcl script, this module has been written that adds Perl
+niceties provided by C<Module::Build> along with some custom requirements for
+the Xilinx ISE Webpack software.
+
+In version 0.01 of this module, we just generate a Tcl script for the project
+titled C<program.tcl> which the user has to invoke as follows to continue using
+it further.
+
+    $ xtclsh program.tcl -help
+
+The Tcl script template is generic but we modify it to add the VHDL files that
+are appropriate for the build that we would like to do.
+
+
+=head2 METHODS
+
+=over 4
+
+=item B<new(%options)>
+
+The C<new()> function is similar to C<Module::Build> except for the fact that it
+supports some extra properties described below.
+
+=back
+
+=head2 THE PROPERTIES SUPPORTED
+
+=over 4
+
+=item C<dist_name>
+
+The name of the project. This is also available as the property C<proj_name>.
+
+=item C<proj_name>
+
+The name of the project. Is a read-only property and is set equal to the value
+of C<dist_name>.
+
+=item C<proj_ext>
+
+The extension of the Xilinx ISE Webpack project file. By default it is C<.xise>.
+We have this just in case the extension changes in the future.
+
+=item C<proj_params>
+
+A hash reference of project parameters necessary to define the development board
+or the device for which we are creating the build. It has multiple keys defined
+below:
+
+=over 8
+
+=item C<family>
+
+The family of the FPGA such as B<spartan3a>, B<spartan6> etc. Refer ISE
+Webpack's documentation for more information.
+
+=item C<device>
+
+The name of the FPGA chip such as B<xc3s700a>, B<xc3s1400a> etc.
+
+=item C<speed>
+
+The speed of the FPGA chip as noted in the chip's documentation. The speed can
+be a negative number. The word 'speed' is a misnomer here but that is what
+Xilinx uses.
+
+=item C<package>
+
+The package type of the FPGA chip which is either B<fg484> or B<fg400> or
+B<fg256> etc.
+
+=item C<language>
+
+The language supported in the project which as of version 0.01 is VHDL. We do
+not yet support Verilog.
+
+=item C<devboard>
+
+The development board that we plan to build for to leverage ISE Webpack's
+internal files for the board. For example, "Spartan-3A Starter Kit".
+
+=back
+
+=item C<tb_toplevel>
+
+The top-level name of the entity for the testbench. Default is 'testbench'.
+
+=item C<tb_project>
+
+The name of the testbench internal project file. Default is 'testbench.prj'.
+
+=item C<tb_exe>
+
+The name of the testbench executable file that is created. Default is
+'testbench.exe'.
+
+=item C<tb_lib>
+
+The name of the local library that the source files will be considered a part of
+in the test bench. Default is 'work'. This is used as a namespace reference to
+the various entities that may be used in the testbench.
+
+=item C<tb_cmd>
+
+The filename in which commands to the simulator software will be written to.
+Default is 'simulate.cmd'.
+
+=item C<tb_wdb>
+
+The testbench debugger file to which data will be written to by the simulation
+software. Default is 'testbench.wdb'.
+
+=item C<tcl_script>
+
+The name of the Tcl script to create for the user. Default is 'program.tcl'.
+
+=back
+
+=head2 EXPORT
+
+None by default since this is an Object Oriented API.
+
+=head1 SEE ALSO
+
+Find me on IRC: I<#hardware> on L<irc://irc.perl.org> as user name B<vicash>.
+
+=head1 AUTHOR
+
+Vikas Kumar, E<lt>vikas@cpan.orgE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2014 by Vikas Kumar
+
+This library is under the MIT license. Please refer the LICENSE file for more
+information provided with the distribution.
+
+=cut

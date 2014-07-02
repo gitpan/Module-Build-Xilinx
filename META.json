@@ -1,0 +1,49 @@
+{
+   "abstract" : "Module::Build::Xilinx generates Tcl scripts to create and build Xilinx ISE projects\nand can compile VHDL files present in the lib/ directory.\n",
+   "author" : [
+      "Vikas N Kumar <vikas@cpan.org>"
+   ],
+   "dynamic_config" : 1,
+   "generated_by" : "Module::Build version 0.4205",
+   "license" : [
+      "mit"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "Module-Build-Xilinx",
+   "prereqs" : {
+      "build" : {
+         "requires" : {
+            "Module::Build" : "0",
+            "Test::More" : "0"
+         }
+      },
+      "configure" : {
+         "requires" : {
+            "Module::Build" : "0",
+            "Software::License" : "0"
+         }
+      },
+      "runtime" : {
+         "requires" : {
+            "File::ShareDir" : "1.00",
+            "Module::Build" : "0"
+         }
+      }
+   },
+   "provides" : {
+      "Module::Build::Xilinx" : {
+         "file" : "lib/Module/Build/Xilinx.pm",
+         "version" : "0.01"
+      }
+   },
+   "release_status" : "stable",
+   "resources" : {
+      "license" : [
+         "http://www.opensource.org/licenses/mit-license.php"
+      ]
+   },
+   "version" : "0.01"
+}
