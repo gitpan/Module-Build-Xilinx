@@ -1,0 +1,44 @@
+2014-07-03  vicash
+
+	* lib/Module/Build/Xilinx.pm, lib/Module/Build/Xilinx.pod: release
+	  0.02
+	* Build.PL, ChangeLog, MANIFEST, README,
+	  lib/Module/Build/Xilinx.pm: adding a README and ChangeLog to make
+	  CPAN Kwalitee happy
+
+2014-07-02  vicash
+
+	* .: Build.bat that is generated on Windows using Strawberry perl
+	  is now ignored
+	* MANIFEST, lib/Module/Build/Xilinx.pod: Adding documentation for
+	  the module
+
+2014-07-01  vicash
+
+	* lib/Module/Build/Xilinx.pm, t/00_use.t: - making the test not
+	  clobber the Build file for CPAN to work nicely - the package
+	  should return 1 and module_name can be overwritten by the user
+	* Build.PL: minor update to the Build.PL
+	* lib/Module/Build/Xilinx.pm: fixing problem with file lists
+	* Build.PL, MANIFEST, MANIFEST.SKIP, lib/Module/Build/Xilinx.pm,
+	  share, share/example, share/example/Build.PL, share/example/src,
+	  share/example/src/dflipflop.vhd, share/example/tb,
+	  share/example/tb/dff_tb.vhd, src, t/00_use.t: completing version
+	  0.01 of the Module::Build::Xilinx code.
+	* Build.PL, MANIFEST, lib/Module/Build/Xilinx.pm, lib/Test, src,
+	  src/dflipflop.vhd, t/00_use.t: Updating the test to fake it
+	  properly. updating the code for scanning of vhdl files
+
+2014-06-30  vicash
+
+	* lib/Module/Build/Xilinx.pm: adding the testbench as a file type
+	  as well
+	* Build.PL, MANIFEST, lib/Module/Build/Xilinx.pm, lib/Test,
+	  lib/Test/Xilinx.pm, lib/Test/dflipflop.vhd, t/00_use.t: Adding a
+	  vhd file processing function
+	* ., Build.PL, LICENSE, MANIFEST, MANIFEST.SKIP,
+	  lib/Module/Build/Xilinx.pm, t, t/00_use.t: adding a test for the
+	  module and other files
+	* ., Build.PL, lib, lib/Module, lib/Module/Build,
+	  lib/Module/Build/Xilinx.pm: starting the M::B::Xilinx module
+

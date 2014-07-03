@@ -21,6 +21,7 @@ ABSTRACT
         'Test::More' => 0,
     },
     requires => {
+        'perl' => 5.0008,
         'Module::Build' => 0,
     },
     dynamic_config => 1,
@@ -29,6 +30,7 @@ ABSTRACT
     },
     share_dir => 'share',
     recurse_into => undef,
+    add_to_cleanup => [ 'Module-Build-Xilinx-*'],
 );
 
 $build->create_build_script;

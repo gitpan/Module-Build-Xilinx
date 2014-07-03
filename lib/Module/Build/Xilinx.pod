@@ -5,7 +5,7 @@ and program a Xilinx FPGA development board using Xilinx ISE Webpack.
 
 =head1 VERSION
 
-0.01
+0.02
 
 =head1 SYNOPSIS
 
@@ -15,7 +15,7 @@ and program a Xilinx FPGA development board using Xilinx ISE Webpack.
 
   my $build = Module::Build::Xilinx->new(
         dist_name => 'fpgasample',
-        dist_version => '0.01',
+        dist_version => '0.02',
         dist_author => 'Vikas N Kumar <vikas@cpan.org>',
         dist_abstract => 'This is a test',
         proj_params => {
@@ -44,7 +44,7 @@ To ease writing of this Tcl script, this module has been written that adds Perl
 niceties provided by C<Module::Build> along with some custom requirements for
 the Xilinx ISE Webpack software.
 
-In version 0.01 of this module, we just generate a Tcl script for the project
+In version 0.02 of this module, we just generate a Tcl script for the project
 titled C<program.tcl> which the user has to invoke as follows to continue using
 it further.
 
@@ -113,7 +113,7 @@ B<fg256> etc.
 
 =item C<language>
 
-The language supported in the project which as of version 0.01 is VHDL. We do
+The language supported in the project which as of version 0.02 is VHDL. We do
 not yet support Verilog.
 
 =item C<devboard>

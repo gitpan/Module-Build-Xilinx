@@ -1,0 +1,21 @@
+Module::Build::Xilinx is a perl module to generate a Tcl script to create, build
+and program a Xilinx FPGA development board using Xilinx ISE Webpack. It
+generates a Tcl script that you can use with Xilinx's xtclsh interpreter to
+perform all required tasks.
+
+To install do the following:
+
+    $ perl Build.PL
+    $ ./Build test
+    $ ./Build install
+
+Xilinx ISE is only supported on Windows and Linux, hence we only support this
+module on Windows and Linux. Technically this module can work on other OSes as
+well because all it does is code generation.
+
+AUTHOR: Vikas N Kumar <vikas@cpan.org>
+
+IRC: #hardware on irc.perl.org as nick: vicash
+
+UPDATING CHANGELOG:
+    $ svn2cl --group-by-day --reparagraph

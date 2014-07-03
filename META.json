@@ -29,14 +29,15 @@
       "runtime" : {
          "requires" : {
             "File::ShareDir" : "1.00",
-            "Module::Build" : "0"
+            "Module::Build" : "0",
+            "perl" : "5.0008"
          }
       }
    },
    "provides" : {
       "Module::Build::Xilinx" : {
          "file" : "lib/Module/Build/Xilinx.pm",
-         "version" : "0.01"
+         "version" : "0.02"
       }
    },
    "release_status" : "stable",
@@ -45,5 +46,5 @@
          "http://www.opensource.org/licenses/mit-license.php"
       ]
    },
-   "version" : "0.01"
+   "version" : "0.02"
 }

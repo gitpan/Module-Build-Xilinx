@@ -1,11 +1,12 @@
 package Module::Build::Xilinx;
 use base 'Module::Build';
 
+use 5.0008;
 use strict;
 use warnings;
 use Carp;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 $VERSION = eval $VERSION;
 
 # project name property
