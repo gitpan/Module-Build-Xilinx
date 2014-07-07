@@ -23,11 +23,13 @@ ABSTRACT
     requires => {
         'perl' => 5.0008,
         'Module::Build' => 0,
+        'File::Basename' => 0,
+        'File::Spec' => 0,
+        'File::HomeDir' => 0,
+        'Data::Dumper' => 0,
+        'Config' => 0,
     },
     dynamic_config => 1,
-    pm_files => {
-        'lib/Module/Build/Xilinx.pm' => 'lib/Module/Build/Xilinx.pm',
-    },
     share_dir => 'share',
     recurse_into => undef,
     add_to_cleanup => [ 'Module-Build-Xilinx-*'],

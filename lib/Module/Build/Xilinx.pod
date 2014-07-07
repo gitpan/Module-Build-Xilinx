@@ -1,11 +1,11 @@
 =head1 NAME
 
-Module::Build::Xilinx - Perl module to generate a Tcl script to create, build
-and program a Xilinx FPGA development board using Xilinx ISE Webpack.
+Module::Build::Xilinx - Perl module to generate a Tcl script to create, build,
+simulate and program a Xilinx FPGA development board using Xilinx ISE Webpack.
 
 =head1 VERSION
 
-0.02
+0.03
 
 =head1 SYNOPSIS
 
@@ -15,7 +15,7 @@ and program a Xilinx FPGA development board using Xilinx ISE Webpack.
 
   my $build = Module::Build::Xilinx->new(
         dist_name => 'fpgasample',
-        dist_version => '0.02',
+        dist_version => '0.03',
         dist_author => 'Vikas N Kumar <vikas@cpan.org>',
         dist_abstract => 'This is a test',
         proj_params => {
@@ -31,6 +31,20 @@ and program a Xilinx FPGA development board using Xilinx ISE Webpack.
   $build->create_build_script;
   # this creates the file Build which when run will create program.tcl  
 
+  ## On the command line
+  ## to setup the Xilinx ISE project file
+  $ ./Build psetup
+  ## to build the project and create the Xilinx bitstream
+  $ ./Build pbuild
+  ## to simulate the testbench
+  $ ./Build simulate
+  ## to view the results of the testbench simulation
+  $ ./Build view
+  ## to program the Xilinx development board
+  $ ./Build program --device=/dev/ttyUSB0
+  ## to clean the project file in case the user wants to remove VHDL sources
+  $ ./Build pclean
+
 =head1 DESCRIPTION
 
 =head2 WHAT DOES THE MODULE DO ?
@@ -41,18 +55,109 @@ However, Xilinx ISE Webpack only supports Tcl scripts using their custom
 C<xtclsh> program.
 
 To ease writing of this Tcl script, this module has been written that adds Perl
-niceties provided by C<Module::Build> along with some custom requirements for
-the Xilinx ISE Webpack software.
+niceties provided by L<Module::Build> along with some custom requirements for
+the Xilinx ISE Webpack software. The Tcl script template is generic but we modify
+it to add the VHDL files that are appropriate for the build that we would like to do.
 
-In version 0.02 of this module, we just generate a Tcl script for the project
-titled C<program.tcl> which the user has to invoke as follows to continue using
+In versions 0.01 and 0.02 of this module, we generated a Tcl script for the project
+titled C<blib/program.tcl> which the user had to invoke as follows to continue using
 it further.
 
     $ xtclsh program.tcl -help
 
-The Tcl script template is generic but we modify it to add the VHDL files that
-are appropriate for the build that we would like to do.
+However, version 0.03 onwards we let Perl do this for us using various actions
+as in L<ACTIONS>. However, the method as in version 0.01 and 0.02 is still
+supported but as below:
 
+    $ xtclsh blib/program.tcl -help
+
+This allows L<Module::Build::Xilinx> to handle various other things such as
+OS-specific code, handling of failures and similar in Perl instead of doing it
+in Tcl.
+
+=head2 ACTIONS
+
+=over 4
+
+=item C<build>
+
+This default action not only executes the default steps as per L<Module::Build>
+but also find the VHDL sources, creates the Tcl script and finds the Xilinx ISE
+install for later use by other actions. The recommended way to run it is this:
+
+    $ ./Build
+
+=item C<psetup>
+
+This action creates the Xilinx ISE project file and adds the other VHDL sources
+to it for both the bitstream and the testbench. The recommended way to run it is:
+
+    $ ./Build psetup
+
+This internally finds the C<xtclsh> program and executes the following command:
+
+    $ xtclsh blib/program.tcl -setup
+
+=item C<pbuild>
+
+This action builds the Xilinx ISE project file and creates the bitstream file in
+the C<blib> directory. The recommended way to run it is:
+
+    $ ./Build psetup
+
+This internally finds the C<xtclsh> program and executes the following command:
+
+    $ xtclsh blib/program.tcl -build
+
+=item C<pclean>
+
+This action cleans the Xilinx ISE project file and removes all the existing VHDL
+sources from it. This is useful if the user wants to remove files but not
+properties from a Xilinx ISE project. The recommended way to run it is:
+
+    $ ./Build pclean
+
+This internally finds the C<xtclsh> program and executes the following command:
+
+    $ xtclsh blib/program.tcl -clean
+
+=item C<test>
+
+This action creates the testbench executable and runs it. The recommended way to run it is:
+
+    $ ./Build test 
+
+This internally finds the C<xtclsh> program and executes the following command:
+
+    $ xtclsh blib/program.tcl -simulate
+
+=item C<view>
+
+This action runs the ISimGui from Xilinx to view the output of the simulation
+run through the C<test> action above. For each test bench, the ISimGui will be
+run one after the other.
+The recommended way to run it is:
+
+    $ ./Build view
+
+This internally finds the C<xtclsh> program and executes the following command:
+
+    $ xtclsh blib/program.tcl -view
+
+=item C<program --device=DEVICE>
+
+This action programs the bitstream onto the device given by the C<--device=DEVICE>
+commandline option. This commandline option is necessary for the programming to
+happen.
+The recommended way to run it is:
+
+    $ ./Build program --device=/dev/my_device
+
+This internally finds the C<xtclsh> program and executes the following command:
+
+    $ xtclsh blib/program.tcl -program /dev/my_device
+
+=back
 
 =head2 METHODS
 
@@ -60,7 +165,7 @@ are appropriate for the build that we would like to do.
 
 =item B<new(%options)>
 
-The C<new()> function is similar to C<Module::Build> except for the fact that it
+The C<new()> function is similar to L<Module::Build> except for the fact that it
 supports some extra properties described below.
 
 =back
@@ -113,7 +218,7 @@ B<fg256> etc.
 
 =item C<language>
 
-The language supported in the project which as of version 0.02 is VHDL. We do
+The language supported in the project which as of version 0.03 is VHDL. We do
 not yet support Verilog.
 
 =item C<devboard>
@@ -123,38 +228,114 @@ internal files for the board. For example, "Spartan-3A Starter Kit".
 
 =back
 
-=item C<tb_toplevel>
+=item C<testbench>
 
-The top-level name of the entity for the testbench. Default is 'testbench'.
+A hash-reference of testbench parameters for each testbench. A project may have
+multiple testbenches for the same set of sources. To handle that scenario,
+different testbench executables need to be creating mapping the correct VHDL
+source to the correct executable. If the user uses parameters that are not the
+default as per L<Module::Build::Xilinx> this property needs to be set.
 
-=item C<tb_project>
+To facilitate this we need to provide a hash-reference like shown below. The
+keys in the hash-reference are optional and will be automatically set if not
+provided.
 
-The name of the testbench internal project file. Default is 'testbench.prj'.
+    my $b = Module::Build::Xilinx->new(
+            ## ...
+            testbench => {
+                'tb/test1_tb.vhd' => {
+                    toplevel => 'test1_tb',
+                },
+                'tb/test2_tb.vhd' => {
+                    toplevel => 'test2_tb',
+                    srclib => 'mylib',
+                },
+                ## the below are also the defaults
+                'tb/test3_tb.vhd' => {
+                    toplevel => 'testbench',
+                    srclib => 'work',
+                    wdb => 'test3_tb.wdb',
+                    exe => 'test3_tb.exe',
+                    prj => 'test3_tb.prj',
+                    cmd => 'test3_tb.cmd',
+                },
+            },
+            ## ...
+            );
 
-=item C<tb_exe>
+=over 8
+
+=item C<toplevel>
+
+The top-level name of the entity for the testbench. Default is I<testbench>.
+This name generally varies from user to user as they have different coding
+preferences.
+
+=item C<srclib>
+
+The name of the local source library that the source files will be considered a part of
+in the test bench. Default is I<work>. The testbench code will refer to the
+units under test by using this value as a namespace. If the user is using
+something else apart from I<work> they should set this parameter.
+
+=item C<prj>
+
+The name of the testbench internal project file. Default is I<$filename.prj>
+where C<$filename> is the name of the testbench VHDL source file without the
+extension. Unless you really want to, this is automatically set by
+L<Module::Build::Xilinx> and it is better to leave it that way.
+
+=item C<exe>
 
 The name of the testbench executable file that is created. Default is
-'testbench.exe'.
+I<$filename.exe> where C<$filename> is the name of the testbench VHDL source file without the
+extension. Unless you really want to, this is automatically set by
+L<Module::Build::Xilinx> and it is better to leave it that way.
 
-=item C<tb_lib>
-
-The name of the local library that the source files will be considered a part of
-in the test bench. Default is 'work'. This is used as a namespace reference to
-the various entities that may be used in the testbench.
-
-=item C<tb_cmd>
+=item C<cmd>
 
 The filename in which commands to the simulator software will be written to.
-Default is 'simulate.cmd'.
+Default is I<$filename.cmd> where C<$filename> is the name of the testbench VHDL source file without the
+extension. Unless you really want to, this is automatically set by
+L<Module::Build::Xilinx> and it is better to leave it that way.
 
-=item C<tb_wdb>
+=item C<wdb>
 
 The testbench debugger file to which data will be written to by the simulation
-software. Default is 'testbench.wdb'.
+software. Default is I<$filename.wdb> where C<$filename> is the name of the testbench VHDL source file without the
+extension. Unless you really want to, this is automatically set by
+L<Module::Build::Xilinx> and it is better to leave it that way.
+
+=back
 
 =item C<tcl_script>
 
-The name of the Tcl script to create for the user. Default is 'program.tcl'.
+The name of the Tcl script to create for the user. Default is C<program.tcl>.
+
+=item C<xilinx>
+
+The path to the Xilinx ISE installation that looks like this
+C</opt/Xilinx/13.4/> on Linux or C<C:\Xilinx\13.2\> on Windows.
+The user can also set the C<$ENV{XILINX}> variable to point to this path to
+override the existing values in or found by Build.PL.
+
+If not provided, L<Module::Build::Xilinx> automatically finds the installed
+Xilinx on the system by looking in common areas such as C</usr>, C</opt>,
+C</usr/local> and the user's home directory on Linux and in C<C:\Xilinx>,
+C<C:\Program Files>, C<C:\Program Files (x86)> and the user's home direcotry on Windows.
+
+=item C<source_files>
+
+This array reference of files that are not present in C<lib/> or C<src/> of the
+current directory to be added to the source. This is useful for adding source
+files from other projects. NOTE: Maybe should be called I<extra_source_files>.
+
+=item C<testbench_files>
+
+This array reference of files that are not present in C<lib/>, C<src/>, C<tb/> or
+C<t/> of the
+current directory to be added to the source. This is useful for adding testbench 
+files from other projects. NOTE: Maybe should be called I<extra_testbench_files>.
 
 =back
 

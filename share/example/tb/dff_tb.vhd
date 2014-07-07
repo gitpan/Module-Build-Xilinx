@@ -7,10 +7,10 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-entity dff_testbench is
-end dff_testbench;
+entity testbench is
+end testbench;
 
-architecture behavior of dff_testbench is
+architecture behavior of testbench is
     constant CLK_PERIOD: time := 20 ns;
     signal clk, reset: std_logic;
     signal d_r, q_r: std_logic; -- to test d_ff_reset

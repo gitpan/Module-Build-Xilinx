@@ -1,5 +1,34 @@
+2014-07-07  vicash
+
+	* ChangeLog: changelog update preparing for release of 0.03
+	* lib/Module/Build/Xilinx.pm: Updating the find_xilinx to work
+	  correctly if xilinx/ENV{XILINX} is set by the user.
+	* lib/Module/Build/Xilinx.pod: updating documentation for version
+	  0.03
+	* Build.PL, lib/Module/Build/Xilinx.pm, t/00_use.t: Adding the code
+	  to run the xtclsh internally from the Build script itself
+
+2014-07-06  vicash
+
+	* Build.PL, lib/Module/Build/Xilinx.pm, t/00_use.t: - adding a find
+	  xilinx installation function so that the Tcl script can be run by
+	  the Build script instead of running xtclsh
+
 2014-07-03  vicash
 
+	* lib/Module/Build/Xilinx.pm: removing the build directory
+	  adjustment and just using blib
+	* lib/Module/Build/Xilinx.pm, lib/Module/Build/Xilinx.pod: Bumping
+	  up the release to do a future release
+	* lib/Module/Build/Xilinx.pm: Adding a log file for simulation runs
+	  that are unique to the test bench itself
+	* lib/Module/Build/Xilinx.pm: we only add the required testbench
+	  files to the prj files
+	* Build.PL, MANIFEST.SKIP, lib/Module/Build/Xilinx.pm,
+	  share/example/tb/dff_tb.vhd, t/00_use.t: Improving the code
+	  generation of the Tcl script so that we can handle multiple test
+	  benches.
+	* ChangeLog: Updating changelog for release
 	* lib/Module/Build/Xilinx.pm, lib/Module/Build/Xilinx.pod: release
 	  0.02
 	* Build.PL, ChangeLog, MANIFEST, README,
