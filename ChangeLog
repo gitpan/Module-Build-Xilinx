@@ -1,5 +1,12 @@
 2014-07-07  vicash
 
+	* ChangeLog, lib/Module/Build/Xilinx.pm,
+	  lib/Module/Build/Xilinx.pod: release 0.04
+	* lib/Module/Build/Xilinx.pm: execution is done using system
+	  instead of exec to handle Win32 execution in a more clean fashion
+	* lib/Module/Build/Xilinx.pm, t/00_use.t: minor Windows infractions
+	  overlooked
+	* ChangeLog: release 0.03
 	* ChangeLog: changelog update preparing for release of 0.03
 	* lib/Module/Build/Xilinx.pm: Updating the find_xilinx to work
 	  correctly if xilinx/ENV{XILINX} is set by the user.

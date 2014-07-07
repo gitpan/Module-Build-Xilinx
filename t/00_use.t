@@ -1,4 +1,5 @@
 use Test::More;
+use File::Spec;
 
 BEGIN {
     use_ok('Module::Build::Xilinx');
@@ -25,7 +26,7 @@ my $b = new_ok('Module::Build::Xilinx', [
 is($b->module_name, 'Module::Build::Xilinx', 'module name is valid');
 is($b->proj_ext, '.xise', 'project extension is as expected');
 is($b->proj_name, $b->dist_name, 'project name is as expected');
-is($b->tcl_script, 'blib/program_test.tcl', 'tcl script is as expected');
+is($b->tcl_script, File::Spec->catfile('blib', 'program_test.tcl'), 'tcl script is as expected');
 foreach (qw/psetup pbuild pclean test view program/) {
     ok($b->can_action($_), "can perform action: $_");
 }

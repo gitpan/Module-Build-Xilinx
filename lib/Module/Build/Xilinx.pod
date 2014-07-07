@@ -5,7 +5,7 @@ simulate and program a Xilinx FPGA development board using Xilinx ISE Webpack.
 
 =head1 VERSION
 
-0.03
+0.04
 
 =head1 SYNOPSIS
 
@@ -15,7 +15,7 @@ simulate and program a Xilinx FPGA development board using Xilinx ISE Webpack.
 
   my $build = Module::Build::Xilinx->new(
         dist_name => 'fpgasample',
-        dist_version => '0.03',
+        dist_version => '0.04',
         dist_author => 'Vikas N Kumar <vikas@cpan.org>',
         dist_abstract => 'This is a test',
         proj_params => {
@@ -218,8 +218,7 @@ B<fg256> etc.
 
 =item C<language>
 
-The language supported in the project which as of version 0.03 is VHDL. We do
-not yet support Verilog.
+The language supported in the project is VHDL. We do not yet support Verilog.
 
 =item C<devboard>
 

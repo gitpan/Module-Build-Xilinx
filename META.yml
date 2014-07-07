@@ -18,7 +18,7 @@ name: Module-Build-Xilinx
 provides:
   Module::Build::Xilinx:
     file: lib/Module/Build/Xilinx.pm
-    version: 0.03
+    version: 0.04
 requires:
   Config: 0
   Data::Dumper: 0
@@ -30,4 +30,4 @@ requires:
   perl: 5.0008
 resources:
   license: http://www.opensource.org/licenses/mit-license.php
-version: 0.03
+version: 0.04

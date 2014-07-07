@@ -11,7 +11,7 @@ use File::Spec;
 use File::Basename qw/fileparse/;
 use File::HomeDir;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 $VERSION = eval $VERSION;
 
 # Xilinx install path
@@ -211,7 +211,7 @@ sub _find_xilinx {
         my @drives = ( $ENV{SystemDrive}, $ENV{HOMEDRIVE} ); 
         @drives = grep { defined $_ } @drives;
         foreach (@drives) {
-            my $d = "$_:\\Xilinx";
+            my $d = "$_\\Xilinx";
            push @xildirs, $d if -d $d;
         }
         my $pf = $ENV{ProgramFiles} || $ENV{PROGRAMFILES};
@@ -287,10 +287,11 @@ sub _exec_tcl_script {
         print $fh "call $cmd1\r\n";
         print $fh "$cmd2\r\n";
         print $fh "echo 'done running $cmd2'\r\n";
+        print $fh "exit\r\n";
         close $fh;
-        exec $bat or croak "Could not execute '$bat': $!";
+        system($bat) == 0 or croak "Could not execute '$bat': $!";
     } else {
-        exec "source $cmd1 && $cmd2" or croak "Could not execute '$cmd1 && $cmd2': $!";
+        system("source $cmd1 && $cmd2") == 0 or croak "Could not execute '$cmd1 && $cmd2': $!";
     }
 }
 
