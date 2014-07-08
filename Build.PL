@@ -6,15 +6,13 @@ my $build = Module::Build->new(
     module_name => 'Module::Build::Xilinx',
     license => 'mit',
     dist_author => 'Vikas N Kumar <vikas@cpan.org>',
-    dist_abstract => <<ABSTRACT,
-Module::Build::Xilinx generates Tcl scripts to create and build Xilinx ISE projects
-and can compile VHDL files present in the lib/ directory.
-ABSTRACT
-    create_readme => 0,
+    dist_abstract => 'Xilinx ISE Webpack based FPGA Development using commandline',
+    create_readme => 1,
     create_license => -e 'LICENSE' ? 0 : 1,
     configure_requires => {
         'Module::Build' => 0,
         'Software::License' => 0,
+        'Pod::Readme' => 0,
     },
     build_requires => {
         'Module::Build' => 0,
@@ -28,6 +26,7 @@ ABSTRACT
         'File::HomeDir' => 0,
         'Data::Dumper' => 0,
         'Config' => 0,
+        'Cwd' => 0,
     },
     dynamic_config => 1,
     share_dir => 'share',
@@ -40,6 +39,9 @@ $build->dispatch('clean');
 $build->dispatch('distmeta');
 $build->dispatch('manifest');
 
+#to update changelog do the following:
+#UPDATING CHANGELOG:
+#    $ svn2cl --group-by-day --reparagraph
 __END__
 #### COPYRIGHT: 2014. Vikas N Kumar. All Rights Reserved
 #### AUTHOR: Vikas N Kumar <vikas@cpan.org>

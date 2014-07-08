@@ -1,11 +1,12 @@
 =head1 NAME
 
-Module::Build::Xilinx - Perl module to generate a Tcl script to create, build,
-simulate and program a Xilinx FPGA development board using Xilinx ISE Webpack.
+Module::Build::Xilinx - Perl module to create, build, simulate and program a
+Xilinx FPGA development board using Xilinx ISE Webpack from the commandline by
+leveraging Xilinx ISE's Tcl interface.
 
 =head1 VERSION
 
-0.04
+0.05
 
 =head1 SYNOPSIS
 
@@ -15,7 +16,7 @@ simulate and program a Xilinx FPGA development board using Xilinx ISE Webpack.
 
   my $build = Module::Build::Xilinx->new(
         dist_name => 'fpgasample',
-        dist_version => '0.04',
+        dist_version => '0.05',
         dist_author => 'Vikas N Kumar <vikas@cpan.org>',
         dist_abstract => 'This is a test',
         proj_params => {
@@ -38,7 +39,7 @@ simulate and program a Xilinx FPGA development board using Xilinx ISE Webpack.
   $ ./Build pbuild
   ## to simulate the testbench
   $ ./Build simulate
-  ## to view the results of the testbench simulation
+  ## to view the results of the testbench simulation as a waveform
   $ ./Build view
   ## to program the Xilinx development board
   $ ./Build program --device=/dev/ttyUSB0
@@ -77,6 +78,14 @@ in Tcl.
 
 =head2 ACTIONS
 
+New actions have been added and some default actions have been modified.
+The actions that need the Xilinx program C<xtclsh> to control the Xilinx ISE
+project file are C<psetup>, C<pbuild> and C<pclean>. The other actions are using
+Xilinx ISE software but are written in perl instead of Tcl. However, the
+generated Tcl script will also have the same actions written in Tcl in case the
+user wants to use Tcl as per the versions of L<Module::Build::Xilinx> before
+0.04.
+
 =over 4
 
 =item C<build>
@@ -103,7 +112,7 @@ This internally finds the C<xtclsh> program and executes the following command:
 This action builds the Xilinx ISE project file and creates the bitstream file in
 the C<blib> directory. The recommended way to run it is:
 
-    $ ./Build psetup
+    $ ./Build pbuild
 
 This internally finds the C<xtclsh> program and executes the following command:
 
@@ -121,41 +130,60 @@ This internally finds the C<xtclsh> program and executes the following command:
 
     $ xtclsh blib/program.tcl -clean
 
-=item C<test>
+=item C<simulate>
 
 This action creates the testbench executable and runs it. The recommended way to run it is:
 
-    $ ./Build test 
+    $ ./Build simulate
 
-This internally finds the C<xtclsh> program and executes the following command:
+This will run all the testbenches located in the C<lib/>, C<src/>, C<tb/> or C<t/> directories.
+The user may have more than one testbench. To run a specific testbench the user
+needs to use the C<--sim_files> option.
 
-    $ xtclsh blib/program.tcl -simulate
+    $ ./Build simulate --sim_files=tb/sim1_tb.vhd
+    $ ./Build simulate --sim_files=tb/sim2_tb.vhd
+
+This action does not use the generated Tcl script. It will warn the user if the
+C<pbuild> action has not been run but will not run it for the user since that
+may take hours for very complex FPGA cores.
+
+=item C<test>
+
+This is the same as the above C<simulate> action. This over-rides the default
+L<Module::Build> action.
+
+    $ ./Build test --sim_files=tb/sim1_tb.vhd
 
 =item C<view>
 
-This action runs the ISimGui from Xilinx to view the output of the simulation
-run through the C<test> action above. For each test bench, the ISimGui will be
-run one after the other.
-The recommended way to run it is:
+This action runs the ISimGui from Xilinx to view the output/waveforms of the simulation
+run through the C<simulate> action above. For each test bench, the ISimGui will be
+run one after the other if no specific testbench is mentioned using
+C<--sim_files>.
+
+The recommended way to run it is as below for viewing all the testbench outputs
+one by one.
 
     $ ./Build view
 
-This internally finds the C<xtclsh> program and executes the following command:
+The user may have more than one testbench outupt. To run a specific testbench the user
+needs to use the C<--sim_files> option.
 
-    $ xtclsh blib/program.tcl -view
+    $ ./Build view --sim_files=tb/sim1_tb.vhd
+    $ ./Build view --sim_files=tb/sim2_tb.vhd
+
+This action does not use the generated Tcl script.
 
 =item C<program --device=DEVICE>
 
 This action programs the bitstream onto the device given by the C<--device=DEVICE>
 commandline option. This commandline option is necessary for the programming to
-happen.
+work. It will try to program each bitstream one by one if there are multiple.
 The recommended way to run it is:
 
     $ ./Build program --device=/dev/my_device
 
-This internally finds the C<xtclsh> program and executes the following command:
-
-    $ xtclsh blib/program.tcl -program /dev/my_device
+This action does not use the generated Tcl script.
 
 =back
 
@@ -337,6 +365,12 @@ current directory to be added to the source. This is useful for adding testbench
 files from other projects. NOTE: Maybe should be called I<extra_testbench_files>.
 
 =back
+
+=head2 EXAMPLES
+
+There is one example present in C<share/example/> directory that demonstrates a
+simple D-Flipflop circuit using VHDL and can be used to see how to write and
+build FPGA code using L<Module::Build::Xilinx>.
 
 =head2 EXPORT
 

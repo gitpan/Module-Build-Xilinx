@@ -5,13 +5,14 @@ use 5.0008;
 use strict;
 use warnings;
 use Carp;
+use Cwd;
 use Config;
 use Data::Dumper;
 use File::Spec;
 use File::Basename qw/fileparse/;
 use File::HomeDir;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 $VERSION = eval $VERSION;
 
 # Xilinx install path
@@ -270,13 +271,12 @@ sub _find_xilinx {
     return $result;
 }
 
-sub _exec_tcl_script {
+sub _exec_tcl_script($) {
     my ($self, $opt) = @_;
     # find xtclsh and run the tcl script
     # for that you need to find the Xilinx install path or use a user supplied
     # one and run it here
     my $tcl = $self->tcl_script;
-    $self->ACTION_build unless -e $tcl;
     my $cmd1 = $self->xilinx_settings32;
     $cmd1 = $self->xilinx_settings64 if $Config{archname} =~ /x86_64|x64/;
     my $cmd2 = "xtclsh $tcl $opt";
@@ -295,35 +295,251 @@ sub _exec_tcl_script {
     }
 }
 
+sub _exec_isimgui($) {
+    my ($self, $wdb) = @_;
+    # NO CHDIR here
+    # find xtclsh and run the tcl script
+    # for that you need to find the Xilinx install path or use a user supplied
+    # one and run it here
+    my $cmd1 = $self->xilinx_settings32;
+    $cmd1 = $self->xilinx_settings64 if $Config{archname} =~ /x86_64|x64/;
+    my $cmd2 = "isimgui -view $wdb";
+    print "Loading settings from $cmd1 and running $cmd2\n" if $self->verbose;
+    if ($self->is_windowsish()) {
+        my $bat = File::Spec->catfile($self->blib, 'runview.bat');
+        open my $fh, '>', $bat or croak "Unable to open $bat for writing: $!";
+        print $fh "call $cmd1\r\n";
+        print $fh "$cmd2\r\n";
+        print $fh "echo 'done running $cmd2'\r\n";
+        print $fh "exit\r\n";
+        close $fh;
+        system($bat) == 0 or croak "Could not execute '$bat': $!";
+    } else {
+        system("source $cmd1 && $cmd2") == 0 or croak "Could not execute '$cmd1 && $cmd2': $!";
+    }
+}
+
+sub _exec_fuse($$$) {
+    my ($self, $prj, $exe, $topname) = @_;
+    my $cwd = Cwd::cwd();
+    chdir $self->blib;
+
+    my $cmd1 = $self->xilinx_settings32;
+    $cmd1 = $self->xilinx_settings64 if $Config{archname} =~ /x86_64|x64/;
+    my $cmd2 = "fuse -incremental $topname -prj $prj -o $exe";
+    print "Loading settings from $cmd1 and running $cmd2\n" if $self->verbose;
+    if ($self->is_windowsish()) {
+        my $bat = 'runfuse.bat';
+        open my $fh, '>', $bat or croak "Unable to open $bat for writing: $!";
+        print $fh "call $cmd1\r\n";
+        print $fh "$cmd2\r\n";
+        print $fh "echo 'done running $cmd2'\r\n";
+        print $fh "exit\r\n";
+        close $fh;
+        system($bat) == 0 or croak "Could not execute '$bat': $!";
+    } else {
+        system("source $cmd1 && $cmd2") == 0 or croak "Could not execute '$cmd1 && $cmd2': $!";
+    }
+    chdir $cwd;
+}
+
+sub _exec_simulation($$$$) {
+    my ($self, $exe, $cmd, $wdb, $log) = @_;
+    my $cwd = Cwd::cwd();
+    chdir $self->blib;
+
+    my $cmd1 = $self->xilinx_settings32;
+    $cmd1 = $self->xilinx_settings64 if $Config{archname} =~ /x86_64|x64/;
+    my $cmd2 = "$exe -tclbatch $cmd -wdb $wdb -log $log";
+    print "Loading settings from $cmd1 and running $cmd2\n" if $self->verbose;
+    if ($self->is_windowsish()) {
+        my $bat = 'runsim.bat';
+        open my $fh, '>', $bat or croak "Unable to open $bat for writing: $!";
+        print $fh "call $cmd1\r\n";
+        print $fh ".\\$cmd2\r\n";
+        print $fh "echo 'done running $cmd2'\r\n";
+        print $fh "exit\r\n";
+        close $fh;
+        system($bat) == 0 or croak "Could not execute '$bat': $!";
+    } else {
+        system("source $cmd1 && ./$cmd2") == 0 or croak "Could not execute '$cmd1 && $cmd2': $!";
+    }
+    chdir $cwd;
+}
+
+sub _exec_impact($) {
+    my ($self, $device) = @_;
+    my $cwd = Cwd::cwd();
+    chdir $self->blib;
+
+    my $cmd1 = $self->xilinx_settings32;
+    $cmd1 = $self->xilinx_settings64 if $Config{archname} =~ /x86_64|x64/;
+    my $pcmd = File::Spec->catfile(File::Spec->curdir(), 'program_device.cmd');
+    my $projipf = File::Spec->catfile(File::Spec->curdir(), $self->proj_name . ".ipf");
+
+    my $cmd2 = "impact -batch $pcmd";
+    print "Loading settings from $cmd1 and running $cmd2\n" if $self->verbose;
+    open my $fh, '>', $pcmd or croak "Unable to write to $pcmd: $!";
+    my $data = << 'PROGDATA';
+setLog -file program_device.log
+setPreference -pref UserLevel:Novice
+setPreference -pref ConfigOnFailure:Stop
+setMode -bscan
+setCable -port auto
+identify
+PROGDATA
+    print $fh $data;
+    my $i = 0;
+    my @bitfiles = <*.bit>;
+    ## assign the bit files to a tag $i
+    foreach (@bitfiles) {
+        $i++;
+        my $line = << "LINEBIT";
+assignFile -p $i -file \"$_\"
+LINEBIT
+        print $fh $line;
+    }
+    ## program all the tags
+    $i = 0;
+    foreach (@bitfiles) {
+        $i++;
+        my $line = << "LINEBIT";
+program -p $i
+LINEBIT
+        print $fh $line;
+    }
+    $data = << "PROGDATA";
+checkIntegrity
+saveprojectfile -file \"$projipf\"
+quit
+PROGDATA
+    print $fh $data;
+    close $fh;
+    if ($self->is_windowsish()) {
+        my $bat = 'runprog.bat';
+        open my $fh, '>', $bat or croak "Unable to open $bat for writing: $!";
+        print $fh "call $cmd1\r\n";
+        print $fh "$cmd2\r\n";
+        print $fh "echo 'done running $cmd2'\r\n";
+        print $fh "exit\r\n";
+        close $fh;
+        system($bat) == 0 or croak "Could not execute '$bat': $!";
+    } else {
+        system("source $cmd1 && $cmd2") == 0 or croak "Could not execute '$cmd1 && $cmd2': $!";
+    }
+    chdir $cwd;
+}
+
 sub ACTION_psetup {
     my $self = shift;
+    $self->SUPER::ACTION_build(@_) if $self->SUPER::can_action('build');
     return $self->_exec_tcl_script('-setup');
 }
 
 sub ACTION_pclean {
     my $self = shift;
+    $self->SUPER::ACTION_build(@_) if $self->SUPER::can_action('build');
     return $self->_exec_tcl_script('-clean');
 }
 
 sub ACTION_pbuild {
     my $self = shift;
+    $self->SUPER::ACTION_build(@_) if $self->SUPER::can_action('build');
     return $self->_exec_tcl_script('-build');
 }
 
 sub ACTION_test {
+    return shift->ACTION_simulate(@_);
+}
+
+sub ACTION_simulate {
     my $self = shift;
-# TODO: manage multiple tests in the Tcl script or in the perl script
-    my $testfiles = $self->SUPER::args('test_files');
-    $self->SUPER::ACTION_test(@_) if $self->SUPER::can_action('test');
-    return $self->_exec_tcl_script('-simulate');
+    # manage multiple views. how does one update runtime_params ? hence we just
+    # re-run the Build as needed.
+    $self->SUPER::ACTION_build(@_) if $self->SUPER::can_action('build');
+    my $tb_data = $self->testbench;
+    my $simfiles = $self->SUPER::args('sim_files') || [keys %$tb_data];
+    $simfiles = [$simfiles] unless ref $simfiles eq 'ARRAY';
+    if (scalar @$simfiles) {
+        if ($self->verbose) {
+            local $Data::Dumper::Terse = 1;
+            print "Running tests for the following: ", Dumper($simfiles);
+        }
+        my $blib = $self->blib;
+        my $flag = File::Spec->catfile($blib, '.done_build');
+        croak "You need to run 'Build pbuild' before running simulate" unless -e $flag;
+        foreach my $vf (@$simfiles) {
+            $vf =~ s:\\:/:g if $self->is_windowsish();# convert windows paths out
+            $vf =~ s:^\./::g; # remove ./ from the beginning
+            unless (exists $tb_data->{$vf}) {
+                carp "$vf is not a valid testbench file";
+                next;
+            }
+            my $prj = $tb_data->{$vf}->{prj};
+            my $exe = $tb_data->{$vf}->{exe};
+            my $cmd = $tb_data->{$vf}->{cmd};
+            my $wdb = $tb_data->{$vf}->{wdb};
+            my $topname = $tb_data->{$vf}->{srclib} . '.' . $tb_data->{$vf}->{toplevel};
+            my $log = $exe;
+            $log =~ s/\.exe$/\.log/g;
+            my $cmdfile = File::Spec->catfile($blib, $cmd);
+            open my $fh, '>', $cmdfile or croak "Unable to open $cmdfile for writing: $!";
+            my $tclcode = << 'CMDEOF';
+onerror {resume}
+wave add /
+run all
+quit -f
+CMDEOF
+            print $fh $tclcode;
+            close $fh;
+            print "Done creating $cmdfile\n" if $self->verbose; 
+            ## will do a chdir into $blib
+            $self->_exec_fuse($prj, $exe, $topname);
+            ## will do a chdir into $blib
+            $self->_exec_simulation($exe, $cmd, $wdb, $log);
+        }
+        # create .done_simulate
+        my $ds = File::Spec->catfile($blib, '.done_simulate');
+        open my $dsf, '>', $ds or carp "Unable to create $ds: $!";
+        print $dsf "1\n";
+        close $dsf;
+    } else {
+        print "No tests were run since no testbenches were found.\n";
+    }
 }
 
 sub ACTION_view {
     my $self = shift;
-# TODO: manage multiple views in the Tcl script or in the perl script
-#    my $viewfiles = $self->SUPER::args('view_files');
-#    print Dumper($viewfiles);
-    return $self->_exec_tcl_script('-view');
+    # manage multiple views. how does one update runtime_params ? hence we just
+    # re-run the Build as needed.
+    $self->SUPER::ACTION_build(@_) if $self->SUPER::can_action('build');
+    my $tb_data = $self->testbench;
+    my $simfiles = $self->SUPER::args('sim_files') || [keys %$tb_data];
+    $simfiles = [$simfiles] unless ref $simfiles eq 'ARRAY';
+    if (scalar @$simfiles) {
+        if ($self->verbose) {
+            local $Data::Dumper::Terse = 1;
+            print "Running views for the following: ", Dumper($simfiles);
+        }
+        foreach my $vf (@$simfiles) {
+            $vf =~ s:\\:/:g if $self->is_windowsish();# convert windows paths out
+            $vf =~ s:^\./::g; # remove ./ from the beginning
+            if (exists $tb_data->{$vf} and defined $tb_data->{$vf}->{wdb}) {
+                my $wdb = File::Spec->catfile($self->blib, $tb_data->{$vf}->{wdb});
+                unless (-e $wdb) {
+                    carp "$wdb has not been created. You need to run ./Build simulate first";
+                    next;
+                }
+                ## we do NOT chdir into the blib directory
+                $self->_exec_isimgui($wdb);
+                print "Finished viewing the output of $vf\n";
+            } else {
+                carp "$vf is not a valid testbench file";
+            }
+        }
+    } else {
+        print "No tests were run since no testbenches were found.\n";
+    }
 }
 
 sub ACTION_program {
@@ -331,7 +547,9 @@ sub ACTION_program {
     my $device = $self->SUPER::args('device');
     croak "You need to use the --device argument to provide the device to program" unless defined $device;
     print "Programming the $device\n" if $self->verbose;
-    return $self->_exec_tcl_script("-program $device");
+    # create the Tcl script
+    $self->SUPER::ACTION_build(@_) if $self->SUPER::can_action('build');
+    return $self->_exec_impact($device);
 }
 
 sub _tcl_functions {
@@ -652,6 +870,8 @@ set tbdir $builddir/../
 catch {exec mkdir $builddir}
 cd $builddir
 puts stderr "INFO: In $builddir"
+# this is necessary after the chdir
+set projipf [pwd]/$projname.ipf
 
 open_project $projfile $projname
 if {$mode_clean == 1} then {
@@ -690,6 +910,7 @@ if {$mode_setup == 1} then {
         set ff $tbdir/$fname
         add_testbench_file $ff
     }
+    add_parameter {iMPACT Project File} $projipf
 TCLSETUP0
     for (my $i = 0; $i < scalar @prjs; ++$i) {
         my $tb_prj = $prjs[$i];
