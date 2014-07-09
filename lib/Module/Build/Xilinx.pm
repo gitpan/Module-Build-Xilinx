@@ -12,7 +12,7 @@ use File::Spec;
 use File::Basename qw/fileparse/;
 use File::HomeDir;
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 $VERSION = eval $VERSION;
 
 # Xilinx install path
@@ -61,16 +61,18 @@ sub new {
     $self->bindoc_dirs([]);
     # sanitize proj_params
     my $pp = $self->proj_params;
-    $pp->{language} = 'VHDL' unless defined $pp->{language};
-    $pp->{language} = uc $pp->{language};
-    croak $pp->{language} . " not supported" unless $pp->{language} eq 'VHDL';
+    if (defined $pp->{language}) {
+        $pp->{language} = 'VHDL' if $pp->{language} =~ /vhdl/i;
+        $pp->{language} = 'Verilog' if $pp->{language} =~ /verilog/i;
+        $pp->{language} = 'N/A' unless $pp->{language} =~ /VHDL|Verilog/i;
+    }
     $self->proj_params($pp);
     # project name can just be dist_name
     $self->proj_name($self->dist_name);
-    # add the VHDL files as build files
-    $self->add_build_element('vhd');
-    # add the testbench files as well
-    $self->add_build_element('vhdtb');
+    # add the Verilog/VHDL files as build files
+    $self->add_build_element('hdl');
+    # add the Verilog/VHDL testbench files as well
+    $self->add_build_element('tb');
     # add the ucf files as build files
     $self->add_build_element('ucf');
     if (defined $self->tcl_script) {
@@ -113,11 +115,19 @@ sub ACTION_build {
 sub process_ucf_files {
     my $self = shift;
     my $regex = qr/\.(?:ucf)$/;
+    return $self->_process_src_files($regex);
+}
+
+sub _process_src_files($) {
+    my ($self, $regex) = @_;
     my @filearray = ();
     foreach my $dir (qw/lib src/) {
         next unless -d $dir;
-        my $files = $self->rscan_dir($dir, $regex);
-        push @filearray, @$files if ref $files eq 'ARRAY' and scalar @$files;
+        eval {
+            my $files = $self->rscan_dir($dir, $regex);
+            push @filearray, @$files if ref $files eq 'ARRAY' and scalar @$files;
+        };
+        carp "hdl: $@" if $@;
     }
     # make unique
     push @filearray, @{$self->source_files};
@@ -125,49 +135,51 @@ sub process_ucf_files {
     $self->source_files([keys %fh]);
 }
 
-sub process_vhd_files {
+sub process_hdl_files {
     my $self = shift;
-    my $regex = qr/\.(?:vhd|vhdl)$/;
-    my @filearray = ();
-    foreach my $dir (qw/lib src/) {
-        next unless -d $dir;
-        my $files = $self->rscan_dir($dir, $regex);
-        push @filearray, @$files if ref $files eq 'ARRAY' and scalar @$files;
-    }
-    # make unique
-    push @filearray, @{$self->source_files};
-    my %fh = map { $_ => 1 } @filearray;
-    $self->source_files([keys %fh]);
+    my $regex = qr/\.(?:vhdl|vhdl|v)$/;
+    return $self->_process_src_files($regex);
 }
 
-sub process_vhdtb_files {
+sub process_tb_files {
     my $self = shift;
     ## patterns taken from $Xilinx/data/projnav/xil_tb_patterns.txt
     my $regex_tb = 
-        qr/(?:_tb|_tf|_testbench|_tb_[0-9]+|databench\w*|testbench\w*)\.(?:vhd|vhdl)$/;
-    my $regex = qr/\.(?:vhd|vhdl)$/;
+        qr/(?:_tb|_tf|_testbench|_tb_[0-9]+|databench\w*|testbench\w*)\.(?:vhdl|vhd|v)$/;
+    my $regex = qr/\.(?:vhdl|vhd|v)$/;
+    return $self->_process_tb_files($regex_tb, $regex);
+}
+
+sub _process_tb_files($$) {
+    my ($self, $regex_tb, $regex) = @_;
     my @filearray = ();
     # find all the _tb files in lib/src
     foreach my $dir (qw/lib src t tb/) {
         next unless -d $dir;
-        my $files = $self->rscan_dir($dir, $regex_tb);
-        push @filearray, @$files if ref $files eq 'ARRAY' and scalar @$files;
+        eval {
+            my $files = $self->rscan_dir($dir, $regex_tb);
+            push @filearray, @$files if ref $files eq 'ARRAY' and scalar @$files;
+        };
+        carp "tb: $@" if $@;
     }
     # make unique
     push @filearray, @{$self->testbench_files};
     my %fh = map { $_ => 1 } @filearray;
     $self->testbench_files([keys %fh]);
-    # find all the vhd files in t/tb, since multiple testbench files
+    # find all the vhd/ver files in t/tb, since multiple testbench files
     # and dependent entity files may co-exist in one as a supplement.
     # this is similar to the t/ directory having a .pm file
     my $tbsrc = $self->testbenchsrc_files;
     foreach my $dir (qw/t tb/) {
         next unless -d $dir;
-        my $files = $self->rscan_dir($dir, $regex);
-        foreach (@$files) {
-            next if $fh{$_};
-            push @$tbsrc, $_;
-        }
+        eval {
+            my $files = $self->rscan_dir($dir, $regex);
+            foreach (@$files) {
+                next if $fh{$_};
+                push @$tbsrc, $_;
+            }
+        };
+        carp "tb: $@" if $@;
     }
     my %fh2 = map { $_ => 1 } @$tbsrc;
     $self->testbenchsrc_files([keys %fh2]);
@@ -779,8 +791,8 @@ sub _dump_tcl_code {
     $pp{device} = $pp{device} || 'xc3s700a';
     $pp{package} = $pp{package} || 'fg484';
     $pp{speed} = $pp{speed} || '-4';
-    $pp{language} = $pp{language} || 'VHDL';
-    $pp{devboard} = $pp{devboard} || 'Spartan-3A Starter Kit';
+    $pp{language} = $pp{language} || 'N/A';
+    $pp{devboard} = $pp{devboard} || 'None Specified';
     my $vars = << "TCLVARS";
 # input parameters start here
 set projext {$projext}
@@ -865,8 +877,8 @@ if { $argc > 0 } then {
 set projfile $projname$projext
 set basedir [pwd]
 set builddir $basedir/$dir_build
-set srcdir $builddir/../
-set tbdir $builddir/../
+set srcdir $basedir
+set tbdir $basedir
 catch {exec mkdir $builddir}
 cd $builddir
 puts stderr "INFO: In $builddir"
@@ -897,6 +909,7 @@ TCLBASE
     my $single_setup = << 'TCLSETUP0';
 if {$mode_setup == 1} then {
     # perform setting of the project parameters
+    add_parameter {name} $projname
     add_parameters [array get projparams]
     foreach fname $src_files {
         set ff $srcdir/$fname
@@ -933,19 +946,33 @@ TCL_PRJ_ADD1
             set ff $srcdir/$fname
             if {[string match *.ucf $fname]} then {
                 puts stderr "INFO: Not adding $ff to $tb_prj"
-            } else {
+            } elseif {[string match *.vhd $fname]} then {
                 puts $fd "vhdl $tb_lib \"$ff\""
+            } elseif {[string match *.vhdl $fname]} then {
+                puts $fd "vhdl $tb_lib \"$ff\""
+            } else {
+                puts $fd "verilog $tb_lib \"$ff\""
             }
         }
         foreach fname $tbsrc_files {
             set ff $tbdir/$fname
             if {[string match *.ucf $fname]} then {
                 puts stderr "INFO: Not adding $ff to $tb_prj"
-            } else {
+            } elseif {[string match *.vhd $fname]} then {
                 puts $fd "vhdl $tb_lib \"$ff\""
+            } elseif {[string match *.vhdl $fname]} then {
+                puts $fd "vhdl $tb_lib \"$ff\""
+            } else {
+                puts $fd "verilog $tb_lib \"$ff\""
             }
         }
-        puts $fd "vhdl $tb_lib \"$tbdir/$tb_f\""
+        if {[string match *.vhd $fname]} then {
+            puts $fd "vhdl $tb_lib \"$tbdir/$tb_f\""
+        } elseif {[string match *.vhdl $fname]} then {
+            puts $fd "vhdl $tb_lib \"$tbdir/$tb_f\""
+        } else {
+            puts $fd "verilog $tb_lib \"$tbdir/$tb_f\""
+        }
         catch {close $fd}
     }
 TCL_PRJ_ADD2

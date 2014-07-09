@@ -1,5 +1,14 @@
+2014-07-09  vicash
+
+	* MANIFEST.SKIP, README, lib/Module/Build/Xilinx.pm,
+	  lib/Module/Build/Xilinx.pod, share/example/Build.PL: Adding
+	  Verilog support to the Module
+
 2014-07-08  vicash
 
+	* ChangeLog, lib/Module/Build/Xilinx.pm,
+	  lib/Module/Build/Xilinx.pod: updating version for future release
+	  testing
 	* ChangeLog: updating changelog for release of 0.05
 	* README, lib/Module/Build/Xilinx.pm, lib/Module/Build/Xilinx.pod:
 	  - Updating the program action to use perl instead of Tcl. -

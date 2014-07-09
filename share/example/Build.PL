@@ -12,7 +12,7 @@ my $b = Module::Build::Xilinx->new(
             device => 'xc3s700a',
             package => 'fg484',
             speed => -4,
-            language => 'VHDL', # default
+            language => 'VHDL',
         },
     );
 $b->create_build_script;
