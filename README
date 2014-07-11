@@ -4,7 +4,7 @@ NAME
     the commandline by leveraging Xilinx ISE's Tcl interface.
 
 VERSION
-    0.06
+    0.07
 
 SYNOPSIS
       use strict;
@@ -13,7 +13,7 @@ SYNOPSIS
 
       my $build = Module::Build::Xilinx->new(
             dist_name => 'fpgasample',
-            dist_version => '0.06',
+            dist_version => '0.07',
             dist_author => 'Vikas N Kumar <vikas@cpan.org>',
             dist_abstract => 'This is a test',
             proj_params => {
@@ -342,10 +342,13 @@ DESCRIPTION
     None by default since this is an Object Oriented API.
 
 SEE ALSO
-    Find me on IRC: *#hardware* on irc: as user name vicash.
+    App::mbxilinx, mbxilinx
 
 AUTHOR
     Vikas Kumar, <vikas@cpan.org>
+
+CONTACT
+    Find me on IRC: *#hardware* on irc: as user name vicash.
 
 COPYRIGHT AND LICENSE
     Copyright (C) 2014 by Vikas Kumar

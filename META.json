@@ -37,14 +37,19 @@
             "File::ShareDir" : "1.00",
             "File::Spec" : "0",
             "Module::Build" : "0",
+            "YAML" : "0",
             "perl" : "5.0008"
          }
       }
    },
    "provides" : {
+      "App::mbxilinx" : {
+         "file" : "lib/App/mbxilinx.pm",
+         "version" : "0.07"
+      },
       "Module::Build::Xilinx" : {
          "file" : "lib/Module/Build/Xilinx.pm",
-         "version" : "0.06"
+         "version" : "0.07"
       }
    },
    "release_status" : "stable",
@@ -53,5 +58,5 @@
          "http://www.opensource.org/licenses/mit-license.php"
       ]
    },
-   "version" : "0.06"
+   "version" : "0.07"
 }

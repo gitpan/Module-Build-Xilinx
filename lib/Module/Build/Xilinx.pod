@@ -6,7 +6,7 @@ leveraging Xilinx ISE's Tcl interface.
 
 =head1 VERSION
 
-0.06
+0.07
 
 =head1 SYNOPSIS
 
@@ -16,7 +16,7 @@ leveraging Xilinx ISE's Tcl interface.
 
   my $build = Module::Build::Xilinx->new(
         dist_name => 'fpgasample',
-        dist_version => '0.06',
+        dist_version => '0.07',
         dist_author => 'Vikas N Kumar <vikas@cpan.org>',
         dist_abstract => 'This is a test',
         proj_params => {
@@ -384,11 +384,15 @@ None by default since this is an Object Oriented API.
 
 =head1 SEE ALSO
 
-Find me on IRC: I<#hardware> on L<irc://irc.perl.org> as user name B<vicash>.
+L<App::mbxilinx>, L<mbxilinx>
 
 =head1 AUTHOR
 
 Vikas Kumar, E<lt>vikas@cpan.orgE<gt>
+
+=head1 CONTACT
+
+Find me on IRC: I<#hardware> on L<irc://irc.perl.org> as user name B<vicash>.
 
 =head1 COPYRIGHT AND LICENSE
 

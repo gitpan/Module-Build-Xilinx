@@ -27,6 +27,7 @@ my $build = Module::Build->new(
         'Data::Dumper' => 0,
         'Config' => 0,
         'Cwd' => 0,
+        'YAML' => 0,
     },
     dynamic_config => 1,
     share_dir => 'share',

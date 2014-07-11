@@ -1,5 +1,18 @@
+2014-07-11  vicash
+
+	* ChangeLog: preparing for release 0.07
+	* Build.PL, MANIFEST, README, bin, bin/mbxilinx, lib/App,
+	  lib/App/mbxilinx.pm, lib/Module/Build/Xilinx.pod,
+	  share/example/build.yml: Adding mbxilinx to the repo to load the
+	  build params from a YAML file instead of using a Build.PL so that
+	  these can be auto-generated as needed. Also avoids folks from
+	  having to write any Perl
+
 2014-07-09  vicash
 
+	* ChangeLog, lib/Module/Build/Xilinx.pm,
+	  lib/Module/Build/Xilinx.pod: preparing for future release
+	* ChangeLog, README: releasing 0.06
 	* MANIFEST.SKIP, README, lib/Module/Build/Xilinx.pm,
 	  lib/Module/Build/Xilinx.pod, share/example/Build.PL: Adding
 	  Verilog support to the Module

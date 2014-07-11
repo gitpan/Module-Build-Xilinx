@@ -12,7 +12,7 @@ use File::Spec;
 use File::Basename qw/fileparse/;
 use File::HomeDir;
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 $VERSION = eval $VERSION;
 
 # Xilinx install path
