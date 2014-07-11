@@ -14,3 +14,4 @@ share/example/build.yml
 share/example/src/dflipflop.vhd
 share/example/tb/dff_tb.vhd
 t/00_use.t
+t/01_app.t

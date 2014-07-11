@@ -12,7 +12,7 @@ use File::Spec;
 use File::Basename qw/fileparse/;
 use File::HomeDir;
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 $VERSION = eval $VERSION;
 
 # Xilinx install path
@@ -289,6 +289,7 @@ sub _exec_tcl_script($) {
     # for that you need to find the Xilinx install path or use a user supplied
     # one and run it here
     my $tcl = $self->tcl_script;
+    croak "$tcl is missing. Please run ./Build first" unless -e $tcl;
     my $cmd1 = $self->xilinx_settings32;
     $cmd1 = $self->xilinx_settings64 if $Config{archname} =~ /x86_64|x64/;
     my $cmd2 = "xtclsh $tcl $opt";
@@ -444,19 +445,19 @@ PROGDATA
 
 sub ACTION_psetup {
     my $self = shift;
-    $self->SUPER::ACTION_build(@_) if $self->SUPER::can_action('build');
+    $self->ACTION_build(@_);
     return $self->_exec_tcl_script('-setup');
 }
 
 sub ACTION_pclean {
     my $self = shift;
-    $self->SUPER::ACTION_build(@_) if $self->SUPER::can_action('build');
+    $self->ACTION_build(@_);
     return $self->_exec_tcl_script('-clean');
 }
 
 sub ACTION_pbuild {
     my $self = shift;
-    $self->SUPER::ACTION_build(@_) if $self->SUPER::can_action('build');
+    $self->ACTION_psetup(@_);
     return $self->_exec_tcl_script('-build');
 }
 
@@ -468,7 +469,7 @@ sub ACTION_simulate {
     my $self = shift;
     # manage multiple views. how does one update runtime_params ? hence we just
     # re-run the Build as needed.
-    $self->SUPER::ACTION_build(@_) if $self->SUPER::can_action('build');
+    $self->ACTION_build(@_);
     my $tb_data = $self->testbench;
     my $simfiles = $self->SUPER::args('sim_files') || [keys %$tb_data];
     $simfiles = [$simfiles] unless ref $simfiles eq 'ARRAY';
@@ -524,7 +525,7 @@ sub ACTION_view {
     my $self = shift;
     # manage multiple views. how does one update runtime_params ? hence we just
     # re-run the Build as needed.
-    $self->SUPER::ACTION_build(@_) if $self->SUPER::can_action('build');
+    $self->ACTION_build(@_);
     my $tb_data = $self->testbench;
     my $simfiles = $self->SUPER::args('sim_files') || [keys %$tb_data];
     $simfiles = [$simfiles] unless ref $simfiles eq 'ARRAY';
@@ -559,8 +560,7 @@ sub ACTION_program {
     my $device = $self->SUPER::args('device');
     croak "You need to use the --device argument to provide the device to program" unless defined $device;
     print "Programming the $device\n" if $self->verbose;
-    # create the Tcl script
-    $self->SUPER::ACTION_build(@_) if $self->SUPER::can_action('build');
+    $self->ACTION_build(@_);
     return $self->_exec_impact($device);
 }
 
@@ -909,7 +909,6 @@ TCLBASE
     my $single_setup = << 'TCLSETUP0';
 if {$mode_setup == 1} then {
     # perform setting of the project parameters
-    add_parameter {name} $projname
     add_parameters [array get projparams]
     foreach fname $src_files {
         set ff $srcdir/$fname

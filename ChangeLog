@@ -1,5 +1,13 @@
 2014-07-11  vicash
 
+	* ChangeLog: release 0.08
+	* lib/Module/Build/Xilinx.pm: some actions need to be defaulted
+	  correctly
+	* MANIFEST, README, lib/App/mbxilinx.pm, t/01_app.t: Adding a unit
+	  test for App::mbxilinx
+	* ChangeLog, bin/mbxilinx, lib/App/mbxilinx.pm,
+	  lib/Module/Build/Xilinx.pm, lib/Module/Build/Xilinx.pod:
+	  upgrading the version for the next release cycle
 	* ChangeLog: preparing for release 0.07
 	* Build.PL, MANIFEST, README, bin, bin/mbxilinx, lib/App,
 	  lib/App/mbxilinx.pm, lib/Module/Build/Xilinx.pod,

@@ -6,7 +6,7 @@ use warnings;
 use YAML qw/LoadFile/;
 use Module::Build::Xilinx;
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 $VERSION = eval $VERSION;
 
 sub process {
@@ -30,12 +30,27 @@ file and generate Build
 
 =head1 VERSION
 
-0.07
+0.08
 
 =head1 SYNOPSIS
 
     use App::mbxilinx;
     App::mbxilinx->process('build.yml');
+
+=head1 FUNCTIONS
+
+=over
+
+=item B<process(YML)>
+
+The C<process()> function takes only 1 argument and that is the YAML filename to
+load.
+
+The invocation of the function is as follows:
+
+    App::mbxilinx->process('myfile.yml');
+
+=back
 
 =head1 THE YAML FILE
 
