@@ -1,5 +1,10 @@
 2014-07-14  vicash
 
+	* ChangeLog: release 0.10
+	* bin/mbxilinx, lib/App/mbxilinx.pm, lib/Module/Build/Xilinx.pm,
+	  lib/Module/Build/Xilinx.pod: Updating the warning for --device
+	  option and making it optional
+	* ChangeLog: updating changelog for future release
 	* ChangeLog, README: updating changelog for future release
 	* lib/Module/Build/Xilinx.pm: minor typo
 

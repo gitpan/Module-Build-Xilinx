@@ -12,7 +12,7 @@ use File::Spec;
 use File::Basename qw/fileparse/;
 use File::HomeDir;
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 $VERSION = eval $VERSION;
 
 # Xilinx install path
@@ -558,8 +558,8 @@ sub ACTION_view {
 sub ACTION_program {
     my $self = shift;
     my $device = $self->SUPER::args('device');
-    croak "You need to use the --device argument to provide the device to program" unless defined $device;
-    print "Programming the $device\n" if $self->verbose;
+    carp "Guessing which device to use for programming." unless defined $device;
+    print "Programming the $device\n" if ($self->verbose and defined $device);
     $self->ACTION_build(@_);
     return $self->_exec_impact($device);
 }

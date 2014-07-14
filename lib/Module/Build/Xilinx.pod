@@ -6,7 +6,7 @@ leveraging Xilinx ISE's Tcl interface.
 
 =head1 VERSION
 
-0.09
+0.10
 
 =head1 SYNOPSIS
 
@@ -16,7 +16,7 @@ leveraging Xilinx ISE's Tcl interface.
 
   my $build = Module::Build::Xilinx->new(
         dist_name => 'fpgasample',
-        dist_version => '0.09',
+        dist_version => '0.10',
         dist_author => 'Vikas N Kumar <vikas@cpan.org>',
         dist_abstract => 'This is a test',
         proj_params => {
@@ -174,14 +174,18 @@ needs to use the C<--sim_files> option.
 
 This action does not use the generated Tcl script.
 
-=item C<program --device=DEVICE>
+=item C<program [--device=DEVICE]>
 
 This action programs the bitstream onto the device given by the C<--device=DEVICE>
-commandline option. This commandline option is necessary for the programming to
+commandline option. This commandline option is B<optional> for the programming to
 work. It will try to program each bitstream one by one if there are multiple.
 The recommended way to run it is:
 
     $ ./Build program --device=/dev/my_device
+
+or if you want Xilinx iMPACT to guess which device to program to,
+
+    $ ./Build program
 
 This action does not use the generated Tcl script.
 
