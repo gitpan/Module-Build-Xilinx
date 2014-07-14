@@ -12,7 +12,7 @@ use File::Spec;
 use File::Basename qw/fileparse/;
 use File::HomeDir;
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 $VERSION = eval $VERSION;
 
 # Xilinx install path
@@ -137,7 +137,7 @@ sub _process_src_files($) {
 
 sub process_hdl_files {
     my $self = shift;
-    my $regex = qr/\.(?:vhdl|vhdl|v)$/;
+    my $regex = qr/\.(?:vhdl|vhd|v)$/;
     return $self->_process_src_files($regex);
 }
 

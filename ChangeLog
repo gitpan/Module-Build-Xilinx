@@ -1,5 +1,13 @@
+2014-07-14  vicash
+
+	* ChangeLog, README: updating changelog for future release
+	* lib/Module/Build/Xilinx.pm: minor typo
+
 2014-07-11  vicash
 
+	* ChangeLog, bin/mbxilinx, lib/App/mbxilinx.pm,
+	  lib/Module/Build/Xilinx.pm, lib/Module/Build/Xilinx.pod:
+	  upgrading for future release candidate
 	* ChangeLog: release 0.08
 	* lib/Module/Build/Xilinx.pm: some actions need to be defaulted
 	  correctly

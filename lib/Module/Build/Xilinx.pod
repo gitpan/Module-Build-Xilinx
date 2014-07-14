@@ -6,7 +6,7 @@ leveraging Xilinx ISE's Tcl interface.
 
 =head1 VERSION
 
-0.08
+0.09
 
 =head1 SYNOPSIS
 
@@ -16,7 +16,7 @@ leveraging Xilinx ISE's Tcl interface.
 
   my $build = Module::Build::Xilinx->new(
         dist_name => 'fpgasample',
-        dist_version => '0.08',
+        dist_version => '0.09',
         dist_author => 'Vikas N Kumar <vikas@cpan.org>',
         dist_abstract => 'This is a test',
         proj_params => {
