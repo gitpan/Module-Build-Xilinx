@@ -12,7 +12,7 @@ use File::Spec;
 use File::Basename qw/fileparse/;
 use File::HomeDir;
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 $VERSION = eval $VERSION;
 
 # Xilinx install path
@@ -302,9 +302,9 @@ sub _exec_tcl_script($) {
         print $fh "echo 'done running $cmd2'\r\n";
         print $fh "exit\r\n";
         close $fh;
-        system($bat) == 0 or croak "Could not execute '$bat': $!";
+        system($bat) == 0 or croak "Failure while executing '$bat': $!";
     } else {
-        system("source $cmd1 && $cmd2") == 0 or croak "Could not execute '$cmd1 && $cmd2': $!";
+        system("source $cmd1 && $cmd2") == 0 or croak "Failure while executing '$cmd1 && $cmd2': $!";
     }
 }
 
@@ -326,9 +326,9 @@ sub _exec_isimgui($) {
         print $fh "echo 'done running $cmd2'\r\n";
         print $fh "exit\r\n";
         close $fh;
-        system($bat) == 0 or croak "Could not execute '$bat': $!";
+        system($bat) == 0 or croak "Failure while executing '$bat': $!";
     } else {
-        system("source $cmd1 && $cmd2") == 0 or croak "Could not execute '$cmd1 && $cmd2': $!";
+        system("source $cmd1 && $cmd2") == 0 or croak "Failure while executing '$cmd1 && $cmd2': $!";
     }
 }
 
@@ -349,9 +349,9 @@ sub _exec_fuse($$$) {
         print $fh "echo 'done running $cmd2'\r\n";
         print $fh "exit\r\n";
         close $fh;
-        system($bat) == 0 or croak "Could not execute '$bat': $!";
+        system($bat) == 0 or croak "Failure while executing '$bat': $!";
     } else {
-        system("source $cmd1 && $cmd2") == 0 or croak "Could not execute '$cmd1 && $cmd2': $!";
+        system("source $cmd1 && $cmd2") == 0 or croak "Failure while executing '$cmd1 && $cmd2': $!";
     }
     chdir $cwd;
 }
@@ -373,9 +373,9 @@ sub _exec_simulation($$$$) {
         print $fh "echo 'done running $cmd2'\r\n";
         print $fh "exit\r\n";
         close $fh;
-        system($bat) == 0 or croak "Could not execute '$bat': $!";
+        system($bat) == 0 or croak "Failure while executing '$bat': $!";
     } else {
-        system("source $cmd1 && ./$cmd2") == 0 or croak "Could not execute '$cmd1 && $cmd2': $!";
+        system("source $cmd1 && ./$cmd2") == 0 or croak "Failure while executing '$cmd1 && $cmd2': $!";
     }
     chdir $cwd;
 }
@@ -436,9 +436,9 @@ PROGDATA
         print $fh "echo 'done running $cmd2'\r\n";
         print $fh "exit\r\n";
         close $fh;
-        system($bat) == 0 or croak "Could not execute '$bat': $!";
+        system($bat) == 0 or croak "Failure while executing '$bat': $!";
     } else {
-        system("source $cmd1 && $cmd2") == 0 or croak "Could not execute '$cmd1 && $cmd2': $!";
+        system("source $cmd1 && $cmd2") == 0 or croak "Failure while executing '$cmd1 && $cmd2': $!";
     }
     chdir $cwd;
 }
@@ -624,6 +624,13 @@ proc process_run_task {task} {
     if {[catch {xilinx::process run $task} err]} then {
         puts stderr "ERROR: Unable to run $task\n$err"
         return 1
+    }
+    set rc [xilinx::process get $task status]
+    puts stderr "INFO: Status of $task: $rc\n"
+    if {[string compare $rc "errors"]  ||
+        [string compare $rc "aborted"] } then {
+       puts stderr "ERROR: Unable to run $task: $rc\n"
+       return 1
     }
     return 0
 }    

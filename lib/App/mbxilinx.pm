@@ -6,7 +6,7 @@ use warnings;
 use YAML qw/LoadFile/;
 use Module::Build::Xilinx;
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 $VERSION = eval $VERSION;
 
 sub process {
@@ -30,7 +30,7 @@ file and generate Build
 
 =head1 VERSION
 
-0.10
+0.11
 
 =head1 SYNOPSIS
 

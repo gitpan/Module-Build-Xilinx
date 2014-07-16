@@ -4,7 +4,7 @@ NAME
     the commandline by leveraging Xilinx ISE's Tcl interface.
 
 VERSION
-    0.10
+    0.11
 
 SYNOPSIS
       use strict;
@@ -13,7 +13,7 @@ SYNOPSIS
 
       my $build = Module::Build::Xilinx->new(
             dist_name => 'fpgasample',
-            dist_version => '0.10',
+            dist_version => '0.11',
             dist_author => 'Vikas N Kumar <vikas@cpan.org>',
             dist_abstract => 'This is a test',
             proj_params => {
