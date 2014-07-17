@@ -12,7 +12,7 @@ use File::Spec;
 use File::Basename qw/fileparse/;
 use File::HomeDir;
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 $VERSION = eval $VERSION;
 
 # Xilinx install path
@@ -627,8 +627,8 @@ proc process_run_task {task} {
     }
     set rc [xilinx::process get $task status]
     puts stderr "INFO: Status of $task: $rc\n"
-    if {[string compare $rc "errors"]  ||
-        [string compare $rc "aborted"] } then {
+    if {[string compare $rc "errors"] == 0  ||
+        [string compare $rc "aborted"] == 0 } then {
        puts stderr "ERROR: Unable to run $task: $rc\n"
        return 1
     }

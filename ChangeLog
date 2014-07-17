@@ -1,5 +1,13 @@
+2014-07-17  vicash
+
+	* ChangeLog: release 0.12
+	* lib/Module/Build/Xilinx.pm: minor error in checking conditions
+
 2014-07-16  vicash
 
+	* ChangeLog, README, bin/mbxilinx, lib/App/mbxilinx.pm,
+	  lib/Module/Build/Xilinx.pm, lib/Module/Build/Xilinx.pod:
+	  upgrading version number for future release candidate
 	* ChangeLog: release 0.11
 	* lib/Module/Build/Xilinx.pm: updating the tcl script to check the
 	  status of each task during the build operation to die at the
