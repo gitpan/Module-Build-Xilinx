@@ -12,7 +12,7 @@ use File::Spec;
 use File::Basename qw/fileparse/;
 use File::HomeDir;
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 $VERSION = eval $VERSION;
 
 # Xilinx install path
@@ -972,9 +972,9 @@ TCL_PRJ_ADD1
                 puts $fd "verilog $tb_lib \"$ff\""
             }
         }
-        if {[string match *.vhd $fname]} then {
+        if {[string match *.vhd $tb_f]} then {
             puts $fd "vhdl $tb_lib \"$tbdir/$tb_f\""
-        } elseif {[string match *.vhdl $fname]} then {
+        } elseif {[string match *.vhdl $tb_f]} then {
             puts $fd "vhdl $tb_lib \"$tbdir/$tb_f\""
         } else {
             puts $fd "verilog $tb_lib \"$tbdir/$tb_f\""

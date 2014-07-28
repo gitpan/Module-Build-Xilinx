@@ -19,10 +19,10 @@ name: Module-Build-Xilinx
 provides:
   App::mbxilinx:
     file: lib/App/mbxilinx.pm
-    version: 0.12
+    version: 0.13
   Module::Build::Xilinx:
     file: lib/Module/Build/Xilinx.pm
-    version: 0.12
+    version: 0.13
 requires:
   Config: 0
   Cwd: 0
@@ -36,4 +36,4 @@ requires:
   perl: 5.0008
 resources:
   license: http://www.opensource.org/licenses/mit-license.php
-version: 0.12
+version: 0.13

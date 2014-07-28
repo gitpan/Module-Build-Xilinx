@@ -1,5 +1,14 @@
+2014-07-28  vicash
+
+	* ChangeLog: release 0.13
+	* lib/Module/Build/Xilinx.pm: minor bugfix in checking if the
+	  testbench file is vhdl or verilog
+
 2014-07-17  vicash
 
+	* ChangeLog, README, bin/mbxilinx, lib/App/mbxilinx.pm,
+	  lib/Module/Build/Xilinx.pm, lib/Module/Build/Xilinx.pod:
+	  upgrading release version for future release
 	* ChangeLog: release 0.12
 	* lib/Module/Build/Xilinx.pm: minor error in checking conditions
 
